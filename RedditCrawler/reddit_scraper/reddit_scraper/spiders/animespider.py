@@ -5,6 +5,7 @@ import scrapy
 import re
 
 
+# This spider will grab all youtube and streamable links from the reddit anime page
 class AnimeSpider(CrawlSpider):  # CrawlSpider let's you go into links on the page; Spider is 1 specific link
     name = "anime"  # Spider Name - must be unique per spider
     allowed_domains = ["www.reddit.com", "www.youtube.com", "streamable.com"]  # Domain - set the scope of the crawler
@@ -18,12 +19,13 @@ class AnimeSpider(CrawlSpider):  # CrawlSpider let's you go into links on the pa
             callback='parse_youtube',  # calls this method whenever it gets a response from that url^
             follow=False),  # This will Go into the found website! but will not go any deeper
 
+        # Rule #2 (individual sublinks) - will find all with streammable
         Rule(LinkExtractor(
             allow=['https://streamable.com/']),
             callback='parse_streamable',
             follow=False),
 
-        # Rule #2 (pages)
+        # Rule #3 (pages)
         Rule(LinkExtractor(
             allow=['/r/anime/\?count=\d*&after=\w*']),
             # \d is some number of digits, \w alpha characters and underscores
@@ -33,15 +35,14 @@ class AnimeSpider(CrawlSpider):  # CrawlSpider let's you go into links on the pa
         # This will go through even pagentation button "next page"
     ]
 
-    # Callback method for a found link
-    # This will retreive the information from the specific site from Rule #1
+    # This will parse out the title of the youtube page
     def parse_youtube(self, response):
         print("\n\n\n--------------------------------------------------------------------------------\n\n\n")
         for data in response.xpath("//div[@id='watch-headline-title']/h1/span/@title").extract():
             print(data)
         print(response.url)
 
-    # Rule2 parse
+    # will Get Title from the response url
     def parse_streamable(self, response):
         print("\n\n\n--------------------------------------------------------------------------------\n\n\n")
         for data in response.xpath("//div[@id='video-footer']/h1[@id]").extract():
@@ -51,7 +52,7 @@ class AnimeSpider(CrawlSpider):  # CrawlSpider let's you go into links on the pa
             print(string)
         print(response.url)
 
-    # Callback method for a pagination link
+    # Callback method for a pagination link. It will quit on the second page
     def pagination(self, response):
         print("------------------------next-------------------------")
 

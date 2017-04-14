@@ -4,6 +4,7 @@ from scrapy.linkextractors import LinkExtractor
 import scrapy
 
 
+# This spider will grab all the questions on daily programmer and add them to a databse
 class ProgrammerSpider(CrawlSpider):
     name = "dailyprogrammer"  # Spider Name - must be unique per spider
     allowed_domains = ["www.reddit.com"]  # Domain - set the scope of the crawler
@@ -36,15 +37,16 @@ class ProgrammerSpider(CrawlSpider):
         # Another Way ToExtract out the URL (from the title of the page itself)
         # for link in response.xpath(
         #         "//div[@id='siteTable']//div[@class='entry unvoted']/p[@class='title']/a/@href").extract():
-        #     # @href will look for an Attribute inside the a HTML.
-        #     # // means look anywhere within the scope
-        #     # / meanss look one level down
         #     path = "https://www.reddit.com" + str(link)
         #     print(str(path))
 
         # Extract Out the Question Content
         for data in response.xpath("//div[@id='siteTable']//div[@class='entry unvoted']//div[@class='md']").extract():
             print(data)
+            # Note:
+            # @____ (i.e. @href or @title) will look for that specific Attribute inside the a HTML block.
+            # // means look anywhere within the scope
+            # / means look one level down
 
     # Callback method for a pagination link
     def pagination(self, response):
