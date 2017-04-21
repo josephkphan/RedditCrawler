@@ -67,11 +67,13 @@ class ProgrammerSpider(CrawlSpider):
                    if data is not None or data == "":
                         # string = re.sub('<[^<]+?>', '', str(data))   # will remove all html tags
                         string = self.remove_html_tags(str(data))
-
+                        string = str(data)
+                        string= string.replace('\n','')
+                        string= re.sub('<h1>[Credit|Finally](.*)</div>','</div>',string)
                         post = {
-                            "url": str(response.url),
-                            "problem": str(data)
-                        }
+                        "url": str(response.url),
+                        "problem": string
+                    }
                         print(post)
                         PymongoClient().get_collection().insert_one(post)
                         # Note:
