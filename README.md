@@ -19,3 +19,8 @@
   - db.<collection_name>.find()
   - db.<collection_name>.drop()
   - db.<collection_name>.count()
+
+
+
+# Solr
+ mongoexport --db reddit_database --collection daily_programmer --out /home/jphan/test/output.json
