@@ -19,13 +19,13 @@ class PymongoClient():
 
     def get_question_collection(self):
         return self.question_collection
-        
+
     def get_content_index_table_collection(self):
         return self.content_index_table_collection
-    
+
     def get_title_index_table_collection(self):
         return self.title_index_table_collection
-    
+
     def get_question_collection_count(self):
         return self.question_collection.count()
 
@@ -92,7 +92,7 @@ class ProgrammerSpider(CrawlSpider):
                     except:
                         description = description[0]
                     print "Successfully Got Problem Description"
-                    
+
                     ##############################################################
                     # Get Link ID
                     try:
@@ -102,7 +102,7 @@ class ProgrammerSpider(CrawlSpider):
                     if post_id is None:
                         post_id = 0
                     print "Successfully Got ID"
-                    
+
                     #############################################################
                     # Get Difficulty, Title, and Update Title Index Table
                     split = str(response.url).split('_')
@@ -111,7 +111,7 @@ class ProgrammerSpider(CrawlSpider):
                     for i in range(4, len(split) ):
                         split[i] = re.sub(r'\W+', '', split[i])
                         title = title + ' ' + split[i]
-                    title = title[1:]    
+                    title = title[1:]
                     print difficulty
                     print title
 
@@ -126,12 +126,14 @@ class ProgrammerSpider(CrawlSpider):
                     string_set = set(split)
                     string_set.discard('id')
                     print string_set
+                    print title_index_table
                     try:
                         for word in string_set:
                             if word in title_index_table:
-                                title_index_table[str(word)] = title_index_table[str(word)] + ',' + str(post_id)
+                                title_index_table[str(word)].append(post_id)
                             else:
-                                title_index_table[str(word)] = str(post_id)
+                                title_index_table[str(word)] = []
+                                title_index_table[str(word)].append(post_id)
                     except Exception, e:
                         print 'Error:',e
                     try:
@@ -139,9 +141,9 @@ class ProgrammerSpider(CrawlSpider):
                         print 'Deleted Title Index Table'
                     except:
                         print 'No Title Index Table to Delete'
-                    PymongoClient().get_title_index_table_collection().insert_one(title_index_table)   
+                    PymongoClient().get_title_index_table_collection().insert_one(title_index_table)
                     print 'Sucessfully Updated Title Index Table'
-                    
+
                     ############################################################
                     # Update Content Index Table
                     try:
@@ -161,17 +163,18 @@ class ProgrammerSpider(CrawlSpider):
                         if len(word) > 15 or any(str.isdigit(c) for c in word):
                             continue
                         if word in content_index_table:
-                            content_index_table[str(word)] = content_index_table[str(word)] + ',' + str(post_id)
+                            content_index_table[str(word)].append(post_id)
                         else:
-                            content_index_table[str(word)] = str(post_id)
+                            content_index_table[str(word)]=[]
+                            content_index_table[str(word)].append(post_id)
                     try:
                         PymongoClient().get_content_index_table_collection().delete_many({'id':'content_index_table' })
                         print 'Deleted Content Index Table'
                     except:
                         print 'No Content Index Table to Delete'
-                    PymongoClient().get_content_index_table_collection().insert_one(content_index_table)   
+                    PymongoClient().get_content_index_table_collection().insert_one(content_index_table)
                     print 'Sucessfully Updated Content Index Table'
-                                 
+
                     ############################################################
                     # Creating Post 
                     post = {
@@ -181,7 +184,7 @@ class ProgrammerSpider(CrawlSpider):
                         "title": title,
                         "webview": web_view_string
                     }
-                    print(post)                    
+                    print(post)
                     PymongoClient().get_question_collection().insert_one(post)
                     # Note:
                     # @____ (i.e. @href or @title) will look for that specific Attribute inside the a HTML block.
